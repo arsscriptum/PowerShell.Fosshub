@@ -8,16 +8,22 @@
 function Get-DownloadUrl{
     [CmdletBinding(SupportsShouldProcess)]
     param(
-    ) 
+        [Parameter(Mandatory=$false)]
+        [string]$FileName = 'iview460_plugins_x64_setup.exe',
+        [Parameter(Mandatory=$false)]
+        [string]$ReleaseId = '623457812413750bd71fef36',
+        [Parameter(Mandatory=$false)]
+        [string]$ProjectId = '5b8d1f5659eee027c3d7883a'       
+    )  
     try{
         $Url = 'https://api.fosshub.com/download'
         $Params = @{
             Uri             = $Url
             Body            = @{
-                projectId  = '5b8d1f5659eee027c3d7883a'
-                releaseId  = '623457812413750bd71fef36'
+                projectId  = "$ProjectId"
+                releaseId  = "$ReleaseId"
                 projectUri = 'IrfanView.html'
-                fileName   = 'iview460_plugins_x64_setup.exe'
+                fileName   = "$FileName"
                 source     = 'CF'
             }
 
@@ -36,7 +42,7 @@ function Get-DownloadUrl{
         }
         return $Data.data
     }catch{
-        Show-ExceptionDetails $_ -ShowStack
+        Write-Error $_
     }
 }
 
@@ -44,9 +50,11 @@ function Get-DownloadUrl{
 function Invoke-DownloadFile{
     [CmdletBinding(SupportsShouldProcess)]
     param(
+        [Parameter(Mandatory=$false)]
+        [string]$FileName = 'iview460_plugins_x64_setup.exe'      
     ) 
     try{
-        $u = Get-DownloadUrl
+        $u = Get-DownloadUrl -FileName $FileName
         $Url = $u.url
         $Params = @{
             Uri             = $Url
@@ -80,6 +88,6 @@ function Invoke-DownloadFile{
         }
         return $Data.data
     }catch{
-        Show-ExceptionDetails $_ -ShowStack
+        Write-Error $_
     }
 }
