@@ -47,15 +47,14 @@ function Get-DownloadUrl{
 }
 
 
-function Invoke-DownloadFile{
+function Invoke-FossHubInstaller{
     [CmdletBinding(SupportsShouldProcess)]
-    param(
-        [Parameter(Mandatory=$True, Position=0)]
-        [string]$DestinationPath,
-        [Parameter(Mandatory=$false)]
-        [string]$FileName = 'iview460_plugins_x64_setup.exe'      
-    ) 
+    param() 
   try{
+    Remove-Item -Path "$PSSCriptRoot\bin" -Recurse -Force -ErrorAction Ignore | Out-Null
+    New-Item -Path "$PSSCriptRoot\bin" -ItemType Directory -Force -ErrorAction Ignore | Out-Null
+    [string]$FileName = 'iview460_plugins_x64_setup.exe'  
+    [string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
     $UData = Get-DownloadUrl -FileName $FileName
     $Url = $UData.url
     $Script:ProgressTitle = 'STATE: DOWNLOAD'
@@ -118,3 +117,5 @@ function Invoke-DownloadFile{
 
   return $true
 }
+
+Invoke-FossHubInstaller
