@@ -3,13 +3,15 @@
 #̷𝓍   Download files from fosshub website
 #̷𝓍   
 #>
-
+[CmdletBinding(SupportsShouldProcess)]
+param()
 
 function Get-DownloadUrl{
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [Parameter(Mandatory=$false)]
-        [string]$FileName = 'iview460_plugins_x64_setup.exe',
+        [Parameter(Mandatory=$true, position = 0)]
+        [ValidateSet('iview460_x64_setup.exe','iview460_plugins_x64_setup.exe')]
+        [string]$FileName,
         [Parameter(Mandatory=$false)]
         [string]$ReleaseId = '623457812413750bd71fef36',
         [Parameter(Mandatory=$false)]
@@ -47,16 +49,16 @@ function Get-DownloadUrl{
 }
 
 
-function Invoke-FossHubInstaller{
+function Invoke-DownloadOnlineFile{
     [CmdletBinding(SupportsShouldProcess)]
-    param() 
+    param(
+        [Parameter(Mandatory=$true, position = 0)]
+        [string]$Url,
+        [Parameter(Mandatory=$true, position = 1)]
+        [string]$DestinationPath      
+    )  
   try{
-    Remove-Item -Path "$PSSCriptRoot\bin" -Recurse -Force -ErrorAction Ignore | Out-Null
-    New-Item -Path "$PSSCriptRoot\bin" -ItemType Directory -Force -ErrorAction Ignore | Out-Null
-    [string]$FileName = 'iview460_plugins_x64_setup.exe'  
-    [string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
-    $UData = Get-DownloadUrl -FileName $FileName
-    $Url = $UData.url
+
     $Script:ProgressTitle = 'STATE: DOWNLOAD'
     $uri = New-Object "System.Uri" "$Url"
     $request = [System.Net.HttpWebRequest]::Create($Url)
@@ -118,4 +120,46 @@ function Invoke-FossHubInstaller{
   return $true
 }
 
-Invoke-FossHubInstaller
+Remove-Item -Path "$PSSCriptRoot\bin" -Recurse -Force -ErrorAction Ignore | Out-Null
+New-Item -Path "$PSSCriptRoot\bin" -ItemType Directory -Force -ErrorAction Ignore | Out-Null
+
+
+
+
+
+[string]$FileName = 'iview460_x64_setup.exe'  
+Write-Host "------------------------------------------" -f DarkRed
+Write-Host "Getting URL for file `"$FileName`"" -f DarkYellow
+
+[string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
+$Url = (Get-DownloadUrl -FileName $FileName).url
+Write-Verbose "URL is `"$Url`""
+[string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
+    
+Write-Host "Downloading..." -f DarkYellow -n
+
+$ret = Invoke-DownloadOnlineFile $Url $DestinationPath
+if($ret){
+  Write-Host "SUCCESS" -f DarkGreen
+}else{
+  Write-Host "ERROR" -f DarkRed
+}
+
+[string]$FileName = 'iview460_plugins_x64_setup.exe' 
+Write-Host "------------------------------------------" -f DarkRed
+Write-Host "Getting URL for file `"$FileName`"" -f DarkYellow
+
+ 
+[string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
+$Url = (Get-DownloadUrl -FileName $FileName).url
+Write-Verbose "URL is `"$Url`""
+[string]$DestinationPath = "$PSSCriptRoot\bin\$FileName"
+    
+Write-Host "Downloading..." -f DarkYellow -n
+
+$ret = Invoke-DownloadOnlineFile $Url $DestinationPath
+if($ret){
+  Write-Host "SUCCESS" -f DarkGreen
+}else{
+  Write-Host "ERROR" -f DarkRed
+}
